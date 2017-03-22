@@ -60,9 +60,10 @@ from functools import wraps
 
 
 def parameters(*args, **kw):
-    settings = {k: v for k, v in kw.items() if k.startswith('_')}
-    for name in settings:
-        kw.pop(name)
+    settings = {}
+    for name in list(kw):
+        if name.startswith('_'):
+            settings[name] = kw.pop(name)
     if args and kw:
         raise TypeError("positional and keyword parameter list"
                         " specifications may not be mixed")

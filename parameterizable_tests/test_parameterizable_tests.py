@@ -14,7 +14,7 @@ class TestParaterizableTests(unittest.TestCase):
         class Test(unittest.TestCase):
             def test_normal_tests_run(self):
                 res.append(1)
-            @parameters([1, 2])
+            @parameters()
             def test_foo(self):
                 raise Exception("This should not be run in this test")
         Test(methodName='test_normal_tests_run').run()
@@ -24,7 +24,7 @@ class TestParaterizableTests(unittest.TestCase):
         res = []
         @parameterizable
         class Test(unittest.TestCase):
-            @parameters([1, 2])
+            @parameters(1, 2)
             def test_foo(self, arg):
                 res.append(arg)
         Test(methodName='test_foo_1').run()
@@ -38,7 +38,7 @@ class TestParaterizableTests(unittest.TestCase):
         res = []
         @parameterizable
         class Test(unittest.TestCase):
-            @parameters([(1, 7), (2, 3)])
+            @parameters((1, 7), (2, 3))
             def test_foo(self, arg1, arg2):
                 res.append((arg1, arg2))
         Test(methodName='test_foo_1_7').run()
@@ -54,7 +54,7 @@ class TestParaterizableTests(unittest.TestCase):
         res = []
         @parameterizable
         class Test(unittest.TestCase):
-            @parameters(dict(foo=dict(a=1, b=2), bar=dict(b=7)))
+            @parameters(foo=dict(a=1, b=2), bar=dict(b=7))
             def test_foo(self, a=None, b=None):
                 res.append((a, b))
         Test(methodName='test_foo_foo').run()
@@ -66,13 +66,25 @@ class TestParaterizableTests(unittest.TestCase):
         res = []
         @parameterize
         class Test(unittest.TestCase):
-            foo_params = dict(a=(1,), b=(2,))
-            def foo_as_bar(self, arg):
+            @parameters(a=(1,), b=(2,))
+            def test_bar(self, arg):
                 res.append(arg)
         Test(methodName='test_bar_a').run()
         self.assertEqual([1], res)
         Test(methodName='test_bar_b').run()
         self.assertEqual([1, 2], res)
+
+    def test_mixed_lists_and_dicts(self):
+        res = []
+        @parameterize
+        class Test(unittest.TestCase):
+            @parameters(a=(1,), b=dict(z=1, k=3))
+            def test_bar(self, z, k=None):
+                res.append((z, k))
+        Test(methodName='test_bar_a').run()
+        self.assertEqual([(1, None)], res)
+        Test(methodName='test_bar_b').run()
+        self.assertEqual([(1, None), (1, 3)], res)
 
 
 class TestLegacyAPI(unittest.TestCase):

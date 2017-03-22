@@ -91,7 +91,8 @@ class TestParaterizableTests(unittest.TestCase):
 class TestLegacyAPI(unittest.TestCase):
 
     # Python2 compat
-    if hasattr(unittest.TestCase, 'assertRaisesRegexp'):
+    if (not hasattr(unittest.TestCase, 'assertRaisesRegex')
+            and  hasattr(unittest.TestCase, 'assertRaisesRegexp')):
         assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 
     def test_normal_tests_run(self):

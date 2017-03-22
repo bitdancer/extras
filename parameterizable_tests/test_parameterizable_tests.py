@@ -62,18 +62,29 @@ class TestParaterizableTests(unittest.TestCase):
         Test(methodName='test_foo_bar').run()
         self.assertEqual([(1, 2), (None, 7)], res)
 
-    def test_dict_of_parameters(self):
+    def test_dict_of_single_arg_parameters(self):
         res = []
         @parameterize
         class Test(unittest.TestCase):
-            # XXX this fails if you say just a=1, b=2; that should be fixed.
-            @parameters(a=(1,), b=(2,))
+            @parameters(a=1, b=2)
             def test_bar(self, arg):
                 res.append(arg)
         Test(methodName='test_bar_a').run()
         self.assertEqual([1], res)
         Test(methodName='test_bar_b').run()
         self.assertEqual([1, 2], res)
+
+    def test_dict_of_multiple_arg_parameters(self):
+        res = []
+        @parameterize
+        class Test(unittest.TestCase):
+            @parameters(a=(1, 7), b=(2, 8))
+            def test_bar(self, arg1, arg2):
+                res.append((arg1, arg2))
+        Test(methodName='test_bar_a').run()
+        self.assertEqual([(1, 7)], res)
+        Test(methodName='test_bar_b').run()
+        self.assertEqual([(1, 7), (2, 8)], res)
 
     def test_mixed_lists_and_dicts(self):
         res = []

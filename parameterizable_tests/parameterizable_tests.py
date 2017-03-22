@@ -106,7 +106,11 @@ def parameterizable(cls):
                 parameters = attr._parameters_
             else:
                 parameters = attr
-            if not hasattr(parameters, 'keys'):
+            if hasattr(parameters, 'keys'):
+                for k, v in parameters.items():
+                    if not hasattr(v, '__iter__'):
+                        parameters[k] = (v,)
+            else:
                 d = {}
                 for x in parameters:
                     if not hasattr(x, '__iter__'):

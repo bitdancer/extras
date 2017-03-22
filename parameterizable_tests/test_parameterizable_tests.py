@@ -90,6 +90,10 @@ class TestParaterizableTests(unittest.TestCase):
 
 class TestLegacyAPI(unittest.TestCase):
 
+    # Python2 compat
+    if hasattr(unittest.TestCase, 'assertRaisesRegexp'):
+        assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
+
     def test_normal_tests_run(self):
         res = []
         @parameterize
@@ -165,3 +169,6 @@ class TestLegacyAPI(unittest.TestCase):
         self.assertEqual([1], res)
         Test(methodName='test_bar_b').run()
         self.assertEqual([1, 2], res)
+
+if __name__=='__main__':
+    unittest.main()

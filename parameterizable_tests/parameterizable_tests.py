@@ -14,14 +14,14 @@ import collections
 from functools import wraps
 
 
-def parameters(*args, **kw):
+def parameters(parameters, **kw):
     def parameterize_decorator(func):
         @wraps(func)
         def parameterize_wrap_function(*args, **kw):
             return func(*args, **kw)
-        parameterize_wrap_function.parameterized = True
-        parameterize_wrap_function.parameters = args
-        parameterize_wrap_function.settings = kw
+        parameterize_wrap_function._parameterized_ = True
+        parameterize_wrap_function._parameters_ = parameters
+        parameterize_wrap_function._settings_ = kw
         return parameterize_wrap_function
     return parameterize_decorator
 
@@ -90,22 +90,31 @@ def parameterizable(cls):
     be used to select the test individually from the unittest command line.
 
     """
+    testfuncs = {}
     paramdicts = {}
     testers = collections.defaultdict(list)
     for name, attr in cls.__dict__.items():
-        if name.endswith('_params') and not hasattr(attr, '__code__'):
-            if not hasattr(attr, 'keys'):
+        if (name.endswith('_params') and not hasattr(attr, '__code__')
+                or hasattr(attr, '_parameterized_')):
+            new_style = hasattr(attr, '_parameterized_')
+            if new_style:
+                parameters = attr._parameters_
+            else:
+                parameters = attr
+            if not hasattr(parameters, 'keys'):
                 d = {}
-                for x in attr:
+                for x in parameters:
                     if not hasattr(x, '__iter__'):
                         x = (x,)
                     n = '_'.join(str(v) for v in x).replace(' ', '_')
                     d[n] = x
-                attr = d
-            paramdicts[name[:-7] + '_as_'] = attr
-        if '_as_' in name:
+                parameters = d
+            if new_style:
+                testfuncs.update(generate_tests(name, parameters))
+            else:
+                paramdicts[name[:-7] + '_as_'] = parameters
+        elif '_as_' in name:
             testers[name.split('_as_')[0] + '_as_'].append(name)
-    testfuncs = {}
     for name in paramdicts:
         if name not in testers:
             raise ValueError("No tester found for {}".format(name))

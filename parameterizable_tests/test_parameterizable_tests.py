@@ -14,11 +14,65 @@ class TestParaterizableTests(unittest.TestCase):
         class Test(unittest.TestCase):
             def test_normal_tests_run(self):
                 res.append(1)
-            @parameters()
+            @parameters([1, 2])
             def test_foo(self):
                 raise Exception("This should not be run in this test")
         Test(methodName='test_normal_tests_run').run()
         self.assertEqual([1], res)
+
+    def test_single_arg_parameters(self):
+        res = []
+        @parameterizable
+        class Test(unittest.TestCase):
+            @parameters([1, 2])
+            def test_foo(self, arg):
+                res.append(arg)
+        Test(methodName='test_foo_1').run()
+        self.assertEqual([1], res)
+        Test(methodName='test_foo_2').run()
+        self.assertEqual([1, 2], res)
+        with self.assertRaises(ValueError):
+            Test(methodName='test_foo_3').run()
+
+    def test_multiple_arg_parameters(self):
+        res = []
+        @parameterizable
+        class Test(unittest.TestCase):
+            @parameters([(1, 7), (2, 3)])
+            def test_foo(self, arg1, arg2):
+                res.append((arg1, arg2))
+        Test(methodName='test_foo_1_7').run()
+        self.assertEqual([(1, 7)], res)
+        Test(methodName='test_foo_2_3').run()
+        self.assertEqual([(1, 7), (2, 3)], res)
+
+    # XXX dicts as parameters don't work unless you are using a dict for the
+    # sets of parameters...with just a list of dicts the method names clash
+    # because it uses the dict keys in the method names.
+
+    def test_dict_parameters(self):
+        res = []
+        @parameterizable
+        class Test(unittest.TestCase):
+            @parameters(dict(foo=dict(a=1, b=2), bar=dict(b=7)))
+            def test_foo(self, a=None, b=None):
+                res.append((a, b))
+        Test(methodName='test_foo_foo').run()
+        self.assertEqual([(1, 2)], res)
+        Test(methodName='test_foo_bar').run()
+        self.assertEqual([(1, 2), (None, 7)], res)
+
+    def test_dict_of_parameters(self):
+        res = []
+        @parameterize
+        class Test(unittest.TestCase):
+            foo_params = dict(a=(1,), b=(2,))
+            def foo_as_bar(self, arg):
+                res.append(arg)
+        Test(methodName='test_bar_a').run()
+        self.assertEqual([1], res)
+        Test(methodName='test_bar_b').run()
+        self.assertEqual([1, 2], res)
 
 
 class TestLegacyAPI(unittest.TestCase):

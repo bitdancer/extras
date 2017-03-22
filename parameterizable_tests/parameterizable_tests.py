@@ -7,29 +7,28 @@ parameterizable decorator.
 
 parameterizable is a simple class decorator that takes no arguments.
 
-parameters takes a single argument, which is either a dict or a list.
-containing the parameters for a test.  If a dict, the keys of the dict
-are used to complete the test name.  If a list, the elements of the
-list are stringified and joined by '_' characters to complete the
-test name.  Thus, given:
+parameters takes a single argument, which is either a dict or a list containing
+the parameters for a test.  If a dict, the keys of the dict are used to
+complete the test name.  If a list, the elements of the list are stringified
+and joined by '_' characters to complete the test name.  Thus, given:
 
     @parameters(1, 2)
     def test_foo(self, arg):
         pass
 
-there will be two tests, 'test_foo_1', and 'test_foo_2', the first of
-which will be passed 1 for arg, and the second of which will be passed
-2 for arg.  On the other hand,
+there will be two tests, 'test_foo_1', and 'test_foo_2', the first of which
+will be passed 1 for arg, and the second of which will be passed 2 for arg.  On
+the other hand,
 
     @parameters(a=(1, 2), b=(3, 4))
     def test_foo(self, arg1, arg2):
         pass
 
-will produce tests named 'test_foo_a' and 'test_foo_b', that will be
-each passed two arguments.
+will produce tests named 'test_foo_a' and 'test_foo_b', that will be each
+passed two arguments.
 
-The individual parameter lists may be single arguments, lists of
-positional arguments, or dictionaries of keyword arguments.  For example:
+The individual parameter lists may be single arguments, lists of positional
+arguments, or dictionaries of keyword arguments.  For example:
 
     @parameters(a=(1, 2), b=dict(z=7, k=3))
     def test_foo(self, z, y=50, k=100):

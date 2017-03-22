@@ -1,16 +1,30 @@
 """Support for parameterizing test methods in a unittest TestCase.
 
 This module provides two decorators: a class decorator named 'parameterizable',
-and a method decorator named 'parameterize'.  In order for the parameterize
+and a method decorator named 'parameters'.  In order for the parameters
 decorator to do anything useful, the test class must be decorated with the
 parameterizable decorator.
 
-parameterizable is a simple decorator that takes no arguments.
+parameterizable is a simple class decorator that takes no arguments.
 
 parameterize takes 
 
 """
 import collections
+from functools import wraps
+
+
+def parameters(*args, **kw):
+    def parameterize_decorator(func):
+        @wraps(func)
+        def parameterize_wrap_function(*args, **kw):
+            return func(*args, **kw)
+        parameterize_wrap_function.parameterized = True
+        parameterize_wrap_function.parameters = args
+        parameterize_wrap_function.settings = kw
+        return parameterize_wrap_function
+    return parameterize_decorator
+
 
 def parameterizable(cls):
     """A test method parameterization class decorator.
@@ -98,6 +112,7 @@ def parameterizable(cls):
     for key, value in testfuncs.items():
         setattr(cls, key, value)
     return cls
+
 
 # Backward compatibility.
 parameterize = parameterizable

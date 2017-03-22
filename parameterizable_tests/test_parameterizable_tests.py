@@ -1,20 +1,23 @@
 import unittest
 
-from parameterizable_tests import parameterizable, parameterize
+from parameterizable_tests import parameterizable, parameters
+# Legacy
+from parameterizable_tests import parameterize
 
 
 class TestParaterizableTests(unittest.TestCase):
 
-    def xest_normal_tests_run(self):
+    def test_normal_tests_run(self):
         res = []
+
         @parameterizable
         class Test(unittest.TestCase):
             def test_normal_tests_run(self):
                 res.append(1)
-            @parameterize()
+            @parameters()
             def test_foo(self):
                 raise Exception("This should not be run in this test")
-        Test(method='test_normal_tests_run').run()
+        Test(methodName='test_normal_tests_run').run()
         self.assertEqual([1], res)
 
 

@@ -26,6 +26,23 @@ def parameters(*args, **kw):
     return parameterize_decorator
 
 
+def generate_tests(base_name, parameters, _test_name=None):
+    test_funcs = {}
+    # _test_name is for legacy API support.
+    name = base_name if _test_name is None else _test_name
+    for paramname, params in parameters.items():
+        if hasattr(params, 'keys'):
+            test = (lambda self, name=name, params=params:
+                            getattr(self, name)(**params))
+        else:
+            test = (lambda self, name=name, params=params:
+                            getattr(self, name)(*params))
+        testname = base_name + '_' + paramname
+        test.__name__ = testname
+        test_funcs[testname] = test
+    return test_funcs
+
+
 def parameterizable(cls):
     """A test method parameterization class decorator.
 
@@ -99,16 +116,8 @@ def parameterizable(cls):
         for paramsname, paramsdict in paramdicts.items():
             if name.startswith(paramsname):
                 testnameroot = 'test_' + name[len(paramsname):]
-                for paramname, params in paramsdict.items():
-                    if hasattr(params, 'keys'):
-                        test = (lambda self, name=name, params=params:
-                                        getattr(self, name)(**params))
-                    else:
-                        test = (lambda self, name=name, params=params:
-                                        getattr(self, name)(*params))
-                    testname = testnameroot + '_' + paramname
-                    test.__name__ = testname
-                    testfuncs[testname] = test
+                testfuncs.update(
+                    generate_tests(testnameroot, paramsdict, name))
     for key, value in testfuncs.items():
         setattr(cls, key, value)
     return cls

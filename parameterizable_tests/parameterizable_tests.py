@@ -115,6 +115,9 @@ def parameterizable(cls):
                 for x in parameters:
                     if not hasattr(x, '__iter__'):
                         x = (x,)
+                    elif hasattr(x, 'items'):
+                        raise ValueError("Dict parameter lists may only be"
+                                         " used with dicts of parameter lists")
                     n = '_'.join(str(v) for v in x).replace(' ', '_')
                     d[n] = x
                 parameters = d

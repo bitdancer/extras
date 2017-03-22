@@ -46,11 +46,7 @@ class TestParaterizableTests(unittest.TestCase):
         Test(methodName='test_foo_2_3').run()
         self.assertEqual([(1, 7), (2, 3)], res)
 
-    # XXX dicts as parameters don't work unless you are using a dict for the
-    # sets of parameters...with just a list of dicts the method names clash
-    # because it uses the dict keys in the method names.
-
-    def test_dict_parameters(self):
+    def test_dict_of_dict_parameters(self):
         res = []
         @parameterizable
         class Test(unittest.TestCase):
@@ -97,6 +93,14 @@ class TestParaterizableTests(unittest.TestCase):
         self.assertEqual([(1, None)], res)
         Test(methodName='test_bar_b').run()
         self.assertEqual([(1, None), (1, 3)], res)
+
+    def test_dict_parameters_invalid_if_not_named(self):
+        with self.assertRaises(ValueError):
+            @parameterizable
+            class Test(unittest.TestCase):
+                @parameters(dict(a=1, b=2), dict(b=7))
+                def test_foo(self, a, b):
+                    pass
 
 
 class TestLegacyAPI(unittest.TestCase):

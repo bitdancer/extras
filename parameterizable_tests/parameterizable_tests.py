@@ -44,9 +44,19 @@ This allows you to have optional arguments in your test methods, at the cost of
 having to specify all the arguments by name when you want to specify any of
 them by name.
 
+Note: if test names are generated, than if and only if the generated test name
+is a valid identifier can it be used to select the test individually from the
+unittest command line.
+
 """
 import collections
 from functools import wraps
+
+
+# TODO: add setting to include the key from a dict of parameter lists in
+#       the arguments that are passed to the test function.
+# TODO: add a setting that can be used to provide a function to generate
+#       the test name.
 
 
 def parameters(*args, **kw):
@@ -85,52 +95,6 @@ def generate_tests(base_name, parameters, _test_name=None):
 
 
 def parameterizable(cls):
-    """A test method parameterization class decorator.
-
-    Tests to be parameterized must be decorated using the 'parameters'
-    decorator, which is passed the values for the parameters.  The va
-
-    The value of the _params attribute may be either a dictionary or a list.
-    The values in the dictionary and the elements of the list may either be
-    single values, or a list.  If single values, they are turned into single
-    element tuples.  However derived, the resulting sequence is passed via
-    *args to the parameterized test function.
-
-    In a _params dictioanry, the keys become part of the name of the generated
-    tests.  In a _params list, the values in the list are converted into a
-    string by joining the string values of the elements of the tuple by '_' and
-    converting any blanks into '_'s, and this become part of the name.
-    The  full name of a generated test is a 'test_' prefix, the portion of the
-    test function name after the  '_as_' separator, plus an '_', plus the name
-    derived as explained above.
-
-    For example, if we have:
-
-        count_params = range(2)
-
-        def count_as_foo_arg(self, foo):
-            self.assertEqual(foo+1, myfunc(foo))
-
-    we will get parameterized test methods named:
-        test_foo_arg_0
-        test_foo_arg_1
-        test_foo_arg_2
-
-    Or we could have:
-
-        example_params = {'foo': ('bar', 1), 'bing': ('bang', 2)}
-
-        def example_as_myfunc_input(self, name, count):
-            self.assertEqual(name+str(count), myfunc(name, count))
-
-    and get:
-        test_myfunc_input_foo
-        test_myfunc_input_bing
-
-    Note: if and only if the generated test name is a valid identifier can it
-    be used to select the test individually from the unittest command line.
-
-    """
     testfuncs = {}
     paramdicts = {}
     testers = collections.defaultdict(list)

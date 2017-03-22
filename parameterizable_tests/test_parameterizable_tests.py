@@ -66,6 +66,7 @@ class TestParaterizableTests(unittest.TestCase):
         res = []
         @parameterize
         class Test(unittest.TestCase):
+            # XXX this fails if you say just a=1, b=2; that should be fixed.
             @parameters(a=(1,), b=(2,))
             def test_bar(self, arg):
                 res.append(arg)

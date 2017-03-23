@@ -39,8 +39,8 @@ class TestParaterizableTests(unittest.TestCase):
         @parameterizable
         class Test(unittest.TestCase):
             @parameters((1, 7), (2, 3))
-            def test_foo(self, arg1, arg2):
-                res.append((arg1, arg2))
+            def test_foo(self, *args):
+                res.append(args)
         Test(methodName='test_foo_1_7').run()
         self.assertEqual([(1, 7)], res)
         Test(methodName='test_foo_2_3').run()
@@ -75,12 +75,24 @@ class TestParaterizableTests(unittest.TestCase):
         @parameterize
         class Test(unittest.TestCase):
             @parameters(a=(1, 7), b=(2, 8))
-            def test_bar(self, arg1, arg2):
-                res.append((arg1, arg2))
+            def test_bar(self, *args):
+                res.append(args)
         Test(methodName='test_bar_a').run()
         self.assertEqual([(1, 7)], res)
         Test(methodName='test_bar_b').run()
         self.assertEqual([(1, 7), (2, 8)], res)
+
+    def test__include_key(self):
+        res = []
+        @parameterize
+        class Test(unittest.TestCase):
+            @parameters(a=(1, 7), b=(2, 8), _include_key=True)
+            def test_bar(self, *args):
+                res.append(args)
+        Test(methodName='test_bar_a').run()
+        self.assertEqual([('a', 1, 7)], res)
+        Test(methodName='test_bar_b').run()
+        self.assertEqual([('a', 1, 7), ('b', 2, 8)], res)
 
     def test_mixed_lists_and_dicts(self):
         res = []
@@ -100,6 +112,14 @@ class TestParaterizableTests(unittest.TestCase):
             class Test(unittest.TestCase):
                 @parameters(dict(a=1, b=2), dict(b=7))
                 def test_foo(self, a, b):
+                    pass
+
+    def test_invalid_setting_raises(self):
+        with self.assertRaises(TypeError):
+            @parameterize
+            class Test(unittest.TestCase):
+                @parameters(a=1, b=2, _nosuch_setting=True)
+                def test_bar(self, *args):
                     pass
 
 

@@ -41,7 +41,16 @@ the other hand,
         pass
 
 will produce tests named 'test_foo_a' and 'test_foo_b' which will each be
-passed two arguments.
+passed two arguments.  You can also specify the special keyword argument
+_include_key, in which case the key that names the parameter list is
+passed as the first non-self argument to the test:
+
+    @parameters(a=(1, 2), b=(3, 4), _include_key=True)
+    def test_foo(self, key, arg1, arg2):
+        pass
+
+key here will be 'a' when arg1 and arg2 are (1, 2), and 'b' when they
+are (3, 4).
 
 The individual parameter lists may be single arguments, lists of positional
 arguments, or dictionaries of keyword arguments.  For example:

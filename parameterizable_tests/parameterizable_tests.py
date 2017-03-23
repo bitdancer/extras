@@ -25,7 +25,16 @@ the other hand,
         pass
 
 will produce tests named 'test_foo_a' and 'test_foo_b', that will be each
-passed two arguments.
+passed two arguments.  You can also specify the special keyword argument
+_include_key, in which case the key that names the parameter list is
+passed as the first non-self argument to the test:
+
+    @parameters(a=(1, 2), b=(3, 4), _include_key=True)
+    def test_foo(self, key, arg1, arg2):
+        pass
+
+key here will be 'a' when arg1 and arg2 are (1, 2), and 'b' when they
+are (3, 4).
 
 The individual parameter lists may be single arguments, lists of positional
 arguments, or dictionaries of keyword arguments.  For example:
@@ -52,16 +61,15 @@ import collections
 from functools import wraps
 
 
-# TODO: add setting to include the key from a dict of parameter lists in
-#       the arguments that are passed to the test function.
-# TODO: add a setting that can be used to provide a function to generate
-#       the test name.
+valid_settings = ['_include_key']
 
 
 def parameters(*args, **kw):
     settings = {}
     for name in list(kw):
         if name.startswith('_'):
+            if name not in valid_settings:
+                raise TypeError("Invalid setting name {}".format(name))
             settings[name] = kw.pop(name)
     if args and kw:
         raise TypeError("positional and keyword parameter list"
@@ -72,7 +80,7 @@ def parameters(*args, **kw):
             return func(*args, **kw)
         parameterize_wrap_function._parameterized_ = True
         parameterize_wrap_function._parameters_ = args if args else kw
-        parameterize_wrap_function._settings_ = kw
+        parameterize_wrap_function._settings_ = settings
         return parameterize_wrap_function
     return parameterize_decorator
 
@@ -110,6 +118,8 @@ def parameterizable(cls):
                 for k, v in parameters.items():
                     if not hasattr(v, '__iter__'):
                         parameters[k] = (v,)
+                    if new_style and attr._settings_.get('_include_key'):
+                        parameters[k] = [k] + list(parameters[k])
             else:
                 d = {}
                 for x in parameters:

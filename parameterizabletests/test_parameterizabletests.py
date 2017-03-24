@@ -25,6 +25,15 @@ class TestParaterizableTests(unittest.TestCase):
                 raise Exception("This should not be run in this test")
         self.runTest(Test, 'test_normal_tests_run')
 
+    def test_parameterized_test_method_is_deleted(self):
+        @parameterizable
+        class Test(unittest.TestCase):
+            @parameters()
+            def test_foo(self):
+                raise Exception("This should not be run in this test")
+        with self.assertRaises(ValueError):
+            Test(methodName='test_foo').run()
+
     def test_single_arg_parameters(self):
         res = []
         @parameterizable

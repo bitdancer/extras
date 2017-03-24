@@ -106,8 +106,8 @@ def parameters(*args, **kw):
 
 def generate_tests(base_name, parameters, _test_name=None):
     test_funcs = {}
-    # _test_name is for legacy API support.
-    name = base_name if _test_name is None else _test_name
+    # if we have a _test_name we are dealing with the legacy API.
+    name = '__' + base_name if _test_name is None else _test_name
     for paramname, params in parameters.items():
         if hasattr(params, 'keys'):
             test = (lambda self, name=name, params=params:
@@ -125,7 +125,7 @@ def parameterizable(cls):
     testfuncs = {}
     paramdicts = {}
     testers = collections.defaultdict(list)
-    for name, attr in cls.__dict__.items():
+    for name, attr in list(cls.__dict__.items()):
         if (name.endswith('_params') and not hasattr(attr, '__code__')
                 or hasattr(attr, '_parameterized_')):
             new_style = hasattr(attr, '_parameterized_')
@@ -152,6 +152,8 @@ def parameterizable(cls):
                 parameters = d
             if new_style:
                 testfuncs.update(generate_tests(name, parameters))
+                delattr(cls, name)
+                setattr(cls, '__' + name, attr)
             else:
                 paramdicts[name[:-7] + '_as_'] = parameters
         elif '_as_' in name:

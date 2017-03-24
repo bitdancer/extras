@@ -8,7 +8,8 @@ from parameterizabletests import parameterize
 class TestParaterizableTests(unittest.TestCase):
 
     def runTest(self, testcase, testname):
-        res = testcase(methodName=testname).run()
+        res = unittest.TestResult()
+        testcase(methodName=testname).run(res)
         self.assertEqual(1, res.testsRun)
         self.assertEqual([], res.failures)
         self.assertEqual([], res.errors)
@@ -169,7 +170,8 @@ class TestLegacyAPI(unittest.TestCase):
         assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 
     def runTest(self, testcase, testname):
-        res = testcase(methodName=testname).run()
+        res = unittest.TestResult()
+        testcase(methodName=testname).run(res)
         self.assertEqual(1, res.testsRun)
         self.assertEqual([], res.failures)
         self.assertEqual([], res.errors)

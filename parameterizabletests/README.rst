@@ -68,6 +68,20 @@ This allows you to have optional arguments in your test methods, at the cost of
 having to specify all the arguments by name when you want to specify any of
 them by name.
 
+For convenience when using a set of parameter lists with more than one test
+method, if the argument to parameters is a single dict or list it is treated as
+the dict or list of paramter lists.  That is, given:
+
+    params1 = [(1, 2), (3, 4)]
+    params2 = dict(a=(1, 2), b=(3, 4))
+
+the following calls are equivalent:
+
+    @parameters(params1)
+    @parameters(*params1)
+    @parameters(params2)
+    @parameters(**params2)
+
 Note: if test names are generated, than if and only if the generated test name
 is a valid identifier can it be used to select the test individually from the
 unittest command line.

@@ -1,8 +1,8 @@
 import unittest
 
-from parameterizable_tests import parameterizable, parameters
+from parameterizabletests import parameterizable, parameters
 # Legacy
-from parameterizable_tests import parameterize
+from parameterizabletests import parameterize
 
 
 class TestParaterizableTests(unittest.TestCase):
@@ -46,11 +46,35 @@ class TestParaterizableTests(unittest.TestCase):
         Test(methodName='test_foo_2_3').run()
         self.assertEqual([(1, 7), (2, 3)], res)
 
+    def test_list_of_multiple_arg_parameters_as_single_arg(self):
+        res = []
+        @parameterizable
+        class Test(unittest.TestCase):
+            @parameters(((1, 7), (2, 3)))
+            def test_foo(self, *args):
+                res.append(args)
+        Test(methodName='test_foo_1_7').run()
+        self.assertEqual([(1, 7)], res)
+        Test(methodName='test_foo_2_3').run()
+        self.assertEqual([(1, 7), (2, 3)], res)
+
     def test_dict_of_dict_parameters(self):
         res = []
         @parameterizable
         class Test(unittest.TestCase):
             @parameters(foo=dict(a=1, b=2), bar=dict(b=7))
+            def test_foo(self, a=None, b=None):
+                res.append((a, b))
+        Test(methodName='test_foo_foo').run()
+        self.assertEqual([(1, 2)], res)
+        Test(methodName='test_foo_bar').run()
+        self.assertEqual([(1, 2), (None, 7)], res)
+
+    def test_dict_of_dict_parameters_as_single_arg(self):
+        res = []
+        @parameterizable
+        class Test(unittest.TestCase):
+            @parameters(dict(foo=dict(a=1, b=2), bar=dict(b=7)))
             def test_foo(self, a=None, b=None):
                 res.append((a, b))
         Test(methodName='test_foo_foo').run()
